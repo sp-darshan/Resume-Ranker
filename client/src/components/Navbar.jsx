@@ -4,31 +4,16 @@ import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { SignInButton, UserButton, useUser } from '@clerk/clerk-react'
 import { useLocation } from 'react-router-dom'
+import { useClerkJwtAndCredits } from '../contexts/useClerkJwt'
 
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { isSignedIn } = useUser()  
-  const [tokens, setTokens] = useState(0)
   const location = useLocation()
+  const { credits, loading } = useClerkJwtAndCredits() 
 
   const showTokens = isSignedIn && (location.pathname === '/upload' || location.pathname === '/pricing')
-
-  useEffect(() => {
-    if (showTokens){
-      fetchTokens()
-    }
-  }, [showTokens])
-
-  const fetchTokens = async () => {
-    try {
-      const res = await fetch('/api/user/tokens')
-      const data = await res.json()
-      setTokens(data.tokens)
-    } catch (err) {
-      console.error('Failed to fetch tokens', err)
-    }
-  }
 
   return (
     <div className="w-full">
@@ -55,7 +40,11 @@ export default function Navbar() {
             <a href="/pricing" className="hover:text-indigo-600 font-semibold">Pricing</a>
             <a href="/#contact" className="hover:text-indigo-600 font-semibold">Contact Us</a>
 
-            {showTokens && <span className="font-bold text-indigo-600">Tokens: {tokens}</span>}
+            {showTokens && (
+              <span className="font-bold text-indigo-600">
+                Tokens: {loading ? '...' : credits ?? 0}
+              </span>
+            )}
 
             {!isSignedIn && (
               <SignInButton mode="modal">

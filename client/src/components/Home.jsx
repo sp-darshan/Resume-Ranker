@@ -6,30 +6,15 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Upload } from 'lucide-react'
 import { useUser } from '@clerk/clerk-react'
+import { useClerkJwtAndCredits } from '../contexts/useClerkJwt'
 
 export default function Home() {
   const [pdfFile, setPdfFile] = useState(null)
   const [jobDesc, setJobDesc] = useState('')
   const [scoreData, setScoreData] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [tokens, setTokens] = useState(0)
+  const [lloading, setLoading] = useState(false)
   const { isSignedIn, user } = useUser()
-
-  useEffect(()=>{
-    if(isSignedIn){
-      fetchtokens()
-    } 
-  }, [isSignedIn])
-
-  const fetchtokens = async () => {
-    try {
-      const res = await fetch('/api/user/tokens')
-      const data = await res.json()
-      setTokens(data.tokens)
-    } catch (err) {
-      console.error('Failed to fetch tokens', err)
-    }
-  }
+  const { credits, loading } = useClerkJwtAndCredits() 
 
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0])
@@ -72,8 +57,8 @@ export default function Home() {
             <p className="mt-4 text-gray-600 text-lg">
               Upload your resume and get AI-powered feedback, ATS score, and suggestions to improve optionally tailored to a job description.
             </p>
-            <span className={`mt-2 block font-bold ${tokens === 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-500'}`}>
-              Tokens Left: {tokens}
+            <span className={`mt-2 block font-bold ${credits === 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-500'}`}>
+              Tokens: {loading ? '...' : credits ?? 0}
             </span>
           </div>
 
@@ -102,10 +87,10 @@ export default function Home() {
 
               <button
                 onClick={handleSubmit}
-                disabled={loading}
+                disabled={lloading}
                 className="rounded-md bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-pink-600 hover:via-red-500 hover:to-yellow-500 text-center transition-all duration-300"
               >
-                {loading ? "Analyzing..." : "Analyze Resume"}
+                {lloading ? "Analyzing..." : "Analyze Resume"}
               </button>
 
               <a href='/pricing' className='text-xs block text-center text-violet-500'>Need Tokens ?</a>
