@@ -4,24 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { FaStar } from 'react-icons/fa'; // FontAwesome Star
 import axios from 'axios';
 import Navbar from './Navbar';
+import { useClerkJwtAndCredits } from '../contexts/useClerkJwt';
 
 export default function Pricing() {
   const [tokens, setTokens] = useState(0);
-
-  // Fetch user tokens from backend
-  useEffect(() => {
-    const fetchTokens = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/api/user/tokens', {
-          withCredentials: true,
-        });
-        setTokens(res.data.tokens);
-      } catch (err) {
-        console.error('Failed to fetch tokens', err);
-      }
-    };
-    fetchTokens();
-  }, []);
+  const { credits, loading } = useClerkJwtAndCredits() 
 
   const plans = [
     {
@@ -70,8 +57,8 @@ export default function Pricing() {
             {/* Display Tokens */}
             <p className="mt-4 text-lg font-semibold">
               Tokens Remaining:{" "}
-              <span className={`${tokens === 0 ? 'text-red-600' : 'text-violet-600'}`}>
-                {tokens}
+              <span className={`${credits === 0 ? 'text-red-600' : 'text-violet-600'}`}>
+                {loading ? '...' : credits ?? 0}
               </span>
             </p>
           </div>
