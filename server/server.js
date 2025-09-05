@@ -1,18 +1,21 @@
-import 'dotenv/config'
-import express from 'express'
-import cors from 'cors'
-import connectDB from './configs/mongodb.js'
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import connectDB from './configs/mongodb.js';
 
-// App config
-const PORT = process.env.PORT || 4000
-const app = express()
-await connectDB()
+// Create app
+const app = express();
 
-// Initialise Middlewares
-app.use(express.json())
-app.use(cors())
+// Middlewares
+app.use(express.json());
+app.use(cors());
 
-// API routes
-app.get('/', (req, res) => res.send("API working"))
+// Connect to MongoDB (do not use top-level await)
+connectDB().catch(err => console.error("DB connection failed:", err));
 
-app.listen(PORT, () => console.log("Server running on Port " + PORT))
+// Routes
+app.get('/', (req, res) => {
+  res.send("API working");
+});
+
+export default app;
