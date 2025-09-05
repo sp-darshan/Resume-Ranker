@@ -1,6 +1,7 @@
 import express from 'express'
 import { clerkWebhooks } from '../controllers/userController.js'
 
+// userRouter instance created
 const userRouter = express.Router()
 
 // Use express.raw if Clerk signature verification fails with express.json
