@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import connectDB from './configs/mongodb.js';
+import userRouter from './routes/userRoutes.js';
 
 // Create app
 const app = express();
@@ -17,5 +18,8 @@ connectDB().catch(err => console.error("DB connection failed:", err));
 app.get('/', (req, res) => {
   res.send("API working");
 });
+
+app.use('/api/user', userRouter)
+
 
 export default app;
