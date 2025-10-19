@@ -1,14 +1,15 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
+import { v4 as uuidv4 } from 'uuid'
 
 const userSchema = new mongoose.Schema({
-    clerkId: { type: String, required: true, unique: true},
-    email: { type: String, required: true, unique: true},
-    photo: { type: String, required: true},
-    firstName: { type: String },
-    lastName: { type: String },
-    creditBalance: { type: Number, default: 5 }
-})
+    uid: {type: String, default: uuidv4, unique: true},
+    username: {type: String, required: true, unique: true},
+    firstname: {type: String, required: true},
+    lastname: {type: String, required: true},
+    email: {type: String, required: true, unique: true},
+    tokens: {type: Number, default: 5},
+}, {timestamps: true});
 
-const userModel = mongoose.models.user || mongoose.model("user", userSchema) 
+const User = mongoose.model("User", userSchema);
 
-export default userModel
+export default User;

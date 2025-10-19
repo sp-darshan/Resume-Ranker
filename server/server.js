@@ -1,25 +1,26 @@
-import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
-import connectDB from './configs/mongodb.js';
-import userRouter from './routes/userRoute.js';
+import express from "express"
+import mongoose from "mongoose";
+import dotenv from 'dotenv'
+import cors from 'cors'
+import userRoutes from "./routes/userRoutes.js"; 
 
-// Create app
+dotenv.config();
 const app = express();
 
-// Middlewares
-app.use(express.json());
+// Middleware
 app.use(cors());
-
-// Connect to MongoDB (do not use top-level await)
-connectDB().catch(err => console.error("DB connection failed:", err));
+app.use(express.json());
 
 // Routes
-app.get('/', (req, res) => {
-  res.send("API working");
-});
+app.use("/api/users", userRoutes);
 
-app.use('/api/user', userRouter)
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI, {
+  dbName: "ResumeRankerDB",
+})
+.then(() => console.log("Connected to MongoDB Atlas"))
+.catch((err) => console.error("MongoDB connection failed:", err));
 
-
-export default app;
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
