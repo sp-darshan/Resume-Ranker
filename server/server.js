@@ -14,6 +14,12 @@ app.use(express.json());
 // Routes
 app.use("/api/users", userRoutes);
 
+// To verify backend hosting
+app.get("/", (req, res) => {
+  res.send("Resume Ranker backend is live and running!");
+});
+
+
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
   dbName: "ResumeRankerDB",
