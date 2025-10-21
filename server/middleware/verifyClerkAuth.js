@@ -1,26 +1,38 @@
-// middleware/verifyClerkAuth.js
-import { clerkClient, verifyToken } from '@clerk/express';
+import { verifyToken } from '@clerk/backend'
 
 export const verifyClerkAuth = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No authorization header" });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        error: 'Authorization header missing or malformed'
+      })
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(' ')[1]?.trim()
 
-    // Verify token using Clerk's Express SDK
+    if (!token) {
+      return res.status(401).json({
+        error: 'Bearer token missing'
+      })
+    }
+
+    // Verify token using Clerk's backend SDK
     const decoded = await verifyToken(token, {
-      secretKey: process.env.CLERK_SECRET_KEY,
-    });
+      secretKey: process.env.CLERK_SECRET_KEY
+    })
 
-    // Attach user info to request
-    req.user = decoded;
-    next();
+    // Attach decoded user info to request
+    req.user = decoded
+    console.log('Verified Clerk ID:', decoded.sub) // Debug log
+
+    next()
   } catch (err) {
-    console.error("Token verification failed:", err);
-    res.status(403).json({ message: "Unauthorized", error: err.message });
+    console.error('Token verification failed:', err)
+    res.status(403).json({
+      error: 'Unauthorized',
+      detail: err.message
+    })
   }
-};
+}
