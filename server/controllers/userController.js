@@ -85,4 +85,39 @@ const getUserTokens = async (req, res) => {
   }
 }
 
-export { registerUser, getUserTokens }
+const deductTokens = async (req, res) => {
+  try {
+    const clerkId = req.user?.sub
+    if (!clerkId) return res.status(401).json({ message: 'Unauthorized: No user ID found' })
+
+    // Safely read amount; default = 2
+    const raw = req.body && Object.prototype.hasOwnProperty.call(req.body, 'amount') ? req.body.amount : undefined
+    const amount = raw === undefined ? 2 : Math.max(1, parseInt(raw, 10) || 0)
+    if (amount <= 0) return res.status(400).json({ message: 'Invalid amount' })
+
+    // Atomic decrement if sufficient tokens
+    const updated = await User.findOneAndUpdate(
+      { uid: clerkId, tokens: { $gte: amount } },
+      { $inc: { tokens: -amount } },
+      { new: true }
+    )
+
+    if (!updated) {
+      const exists = await User.findOne({ uid: clerkId })
+      if (!exists) return res.status(404).json({ message: 'User not found', uid: clerkId })
+      return res.status(400).json({ message: 'Insufficient tokens', required: amount, available: exists.tokens })
+    }
+
+    return res.status(200).json({
+      message: 'Tokens deducted',
+      deducted: amount,
+      tokens: updated.tokens,
+      user: { uid: updated.uid, username: updated.username, email: updated.email }
+    })
+  } catch (err) {
+    console.error('Deduct tokens error:', err)
+    return res.status(500).json({ message: 'Server error', error: err.message })
+  }
+}
+
+export { registerUser, getUserTokens, deductTokens }

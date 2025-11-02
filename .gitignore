@@ -8,4 +8,5 @@ node_modules
 client/node_modules
 server/node_modules
 
-
+New Text Document.txt
+client/src/contexts/useToken.js

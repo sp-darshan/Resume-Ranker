@@ -19,7 +19,7 @@ export function useClerkJwtAndCredits() {
         // Get the Clerk JWT
         const token = await getToken()
         setJwt(token)
-        console.log('Clerk JWT obtained:', !!token)
+        console.log('Clerk JWT obtained:', token)
 
         // Only proceed if we have both token and user info
         if (!token || !user) {
