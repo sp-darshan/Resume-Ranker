@@ -7,6 +7,8 @@ import axios from 'axios'
 import { Upload } from 'lucide-react'
 import { useUser } from '@clerk/clerk-react'
 import { useClerkJwtAndCredits } from '../contexts/useClerkJwt'
+import { useToken } from '../contexts/useToken'  // adjust the path if different
+
 
 export default function Home() {
   const [pdfFile, setPdfFile] = useState(null)
@@ -15,6 +17,8 @@ export default function Home() {
   const [lloading, setLoading] = useState(false)
   const { isSignedIn, user } = useUser()
   const { credits, loading } = useClerkJwtAndCredits() 
+  const { deductTokens, fetchTokens, loading: tokenLoading, error: tokenError } = useToken()
+
 
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0])
@@ -23,23 +27,43 @@ export default function Home() {
   const handleSubmit = async () => {
     if (!pdfFile) return alert("Please upload a resume.")
     setLoading(true)
+
     try {
       const formData = new FormData()
       formData.append('resume', pdfFile)
-      formData.append('jobDesc', jobDesc)
+      formData.append('jobDescription', jobDesc) // must match backend field name
 
-      const res = await axios.post('http://localhost:5000/api/analyze', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      // Step 1: Call your new backend API first
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/analyze`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      )
 
-      setScoreData(res.data)
+      if (res.status === 200 && res.data?.analysis) {
+        const { score, comment } = res.data.analysis;
+
+        if (score !== null && score !== undefined) {
+          // deduct tokens only if valid
+          const tokenRes = await deductTokens(2);
+          if (!tokenRes.success) {
+            alert(`Token deduction failed: ${tokenRes.error || 'Unknown error'}`);
+          }
+
+          setScoreData({ score, feedback: comment });
+          await fetchTokens();
+        } else {
+          alert("Resume analysis failed — invalid score.");
+        }
+      }
     } catch (err) {
-      console.error(err)
+      console.error("Error in analysis:", err)
       alert("Analysis failed. Please try again.")
     } finally {
       setLoading(false)
     }
   }
+
 
   return (
     <div className='bg-violet-50'>
@@ -71,7 +95,7 @@ export default function Home() {
               </label>
               <input
                 type="file"
-                accept="application/pdf"
+                accept=".pdf"
                 onChange={handleFileChange}
                 className="border border-gray-300 rounded-md px-4 mb-2 py-2 text-sm"
               />
@@ -87,10 +111,10 @@ export default function Home() {
 
               <button
                 onClick={handleSubmit}
-                disabled={lloading}
+                disabled={lloading || tokenLoading}
                 className="rounded-md bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-pink-600 hover:via-red-500 hover:to-yellow-500 text-center transition-all duration-300"
               >
-                {lloading ? "Analyzing..." : "Analyze Resume"}
+                {lloading || tokenLoading ? "Processing..." : "Analyze Resume"}
               </button>
 
               <a href='/pricing' className='text-xs block text-center text-violet-500'>Need Tokens ?</a>

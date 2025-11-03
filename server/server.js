@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import dotenv from 'dotenv'
 import cors from 'cors'
 import userRoutes from "./routes/userRoutes.js"; 
+import analyzeRoute from './routes/analyzeRoutes.js';
+
 
 dotenv.config();
 const app = express();
@@ -14,6 +16,7 @@ app.use(express.urlencoded({ extended: true }))
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use('/api', analyzeRoute);
 
 // To verify backend hosting
 app.get("/", (req, res) => {
