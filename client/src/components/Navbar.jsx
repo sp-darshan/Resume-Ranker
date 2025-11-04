@@ -4,14 +4,13 @@ import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { SignInButton, UserButton, useUser } from '@clerk/clerk-react'
 import { useLocation } from 'react-router-dom'
-import { useClerkJwtAndCredits } from '../contexts/useClerkJwt'
-
+import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { isSignedIn } = useUser()  
   const location = useLocation()
-  const { credits, loading } = useClerkJwtAndCredits() 
+  const { tokens, loading } = useAuthToken()
 
   const showTokens = isSignedIn && (location.pathname === '/upload' || location.pathname === '/pricing')
 
@@ -42,7 +41,7 @@ export default function Navbar() {
 
             {showTokens && (
               <span className="font-bold text-indigo-600">
-                Tokens: {loading ? '...' : credits ?? 0}
+                Tokens: {loading ? '...' : tokens ?? 0}
               </span>
             )}
 

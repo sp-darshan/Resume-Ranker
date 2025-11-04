@@ -6,8 +6,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Upload } from 'lucide-react'
 import { useUser } from '@clerk/clerk-react'
-import { useClerkJwtAndCredits } from '../contexts/useClerkJwt'
-import { useToken } from '../contexts/useToken'  // adjust the path if different
+import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
 
 
 export default function Home() {
@@ -16,8 +15,7 @@ export default function Home() {
   const [scoreData, setScoreData] = useState(null)
   const [lloading, setLoading] = useState(false)
   const { isSignedIn, user } = useUser()
-  const { credits, loading } = useClerkJwtAndCredits() 
-  const { deductTokens, fetchTokens, loading: tokenLoading, error: tokenError } = useToken()
+  const { tokens, loading: tokenLoading, deductTokens } = useAuthToken()
 
 
   const handleFileChange = (e) => {
@@ -26,14 +24,17 @@ export default function Home() {
 
   const handleSubmit = async () => {
     if (!pdfFile) return alert("Please upload a resume.")
+    if (!isSignedIn) return alert("Please sign in first.")
+    if ((tokens ?? 0) < 2) return alert("Insufficient tokens.")
+
     setLoading(true)
 
     try {
+      // Step 1: Analysis first
       const formData = new FormData()
       formData.append('resume', pdfFile)
-      formData.append('jobDescription', jobDesc) // must match backend field name
+      formData.append('jobDescription', jobDesc)
 
-      // Step 1: Call your new backend API first
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/analyze`,
         formData,
@@ -41,24 +42,23 @@ export default function Home() {
       )
 
       if (res.status === 200 && res.data?.analysis) {
-        const { score, comment } = res.data.analysis;
+        const { score, comment } = res.data.analysis
 
         if (score !== null && score !== undefined) {
-          // deduct tokens only if valid
-          const tokenRes = await deductTokens(2);
+          // Step 2: Deduct tokens after successful analysis
+          const tokenRes = await deductTokens(2)
           if (!tokenRes.success) {
-            alert(`Token deduction failed: ${tokenRes.error || 'Unknown error'}`);
+            throw new Error(`Token deduction failed: ${tokenRes.error}`)
           }
 
-          setScoreData({ score, feedback: comment });
-          await fetchTokens();
-        } else {
-          alert("Resume analysis failed — invalid score.");
+          // Step 3: Show results (tokens automatically updated in context)
+          setScoreData({ score, feedback: comment })
+          alert('Analysis completed successfully!')
         }
       }
     } catch (err) {
-      console.error("Error in analysis:", err)
-      alert("Analysis failed. Please try again.")
+      console.error("Error:", err)
+      alert(err.message || "Analysis failed")
     } finally {
       setLoading(false)
     }
@@ -81,8 +81,8 @@ export default function Home() {
             <p className="mt-4 text-gray-600 text-lg">
               Upload your resume and get AI-powered feedback, ATS score, and suggestions to improve optionally tailored to a job description.
             </p>
-            <span className={`mt-2 block font-bold ${credits === 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-500'}`}>
-              Tokens: {loading ? '...' : credits ?? 0}
+            <span className={`mt-2 block font-bold ${tokens === 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-500'}`}>
+              Tokens: {tokenLoading ? '...' : tokens ?? 0}
             </span>
           </div>
 
@@ -111,10 +111,10 @@ export default function Home() {
 
               <button
                 onClick={handleSubmit}
-                disabled={lloading || tokenLoading}
+                disabled={lloading || !isSignedIn || (tokens ?? 0) < 2}
                 className="rounded-md bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-pink-600 hover:via-red-500 hover:to-yellow-500 text-center transition-all duration-300"
               >
-                {lloading || tokenLoading ? "Processing..." : "Analyze Resume"}
+                {lloading ? "Analyzing..." : !isSignedIn ? "Sign in" : (tokens ?? 0) < 2 ? "Insufficient Tokens" : "Analyze Resume (2 tokens)"}
               </button>
 
               <a href='/pricing' className='text-xs block text-center text-violet-500'>Need Tokens ?</a>
