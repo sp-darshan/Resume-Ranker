@@ -4,11 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { FaStar } from 'react-icons/fa'; // FontAwesome Star
 import axios from 'axios';
 import Navbar from './Navbar';
-import { useClerkJwtAndCredits } from '../contexts/useClerkJwt';
+import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
 
 export default function Pricing() {
   const [tokens, setTokens] = useState(0);
-  const { credits, loading } = useClerkJwtAndCredits() 
+  const { tokens: credits, loading} = useAuthToken() 
 
   const plans = [
     {
