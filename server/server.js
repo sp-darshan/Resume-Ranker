@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import userRoutes from "./routes/userRoutes.js"; 
 import analyzeRoute from './routes/analyzeRoutes.js';
-
+import paymentRoutes from './routes/paymentRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -17,6 +17,7 @@ app.use(express.urlencoded({ extended: true }))
 // Routes
 app.use("/api/users", userRoutes);
 app.use('/api', analyzeRoute);
+app.use("/api/payments", paymentRoutes);
 
 // To verify backend hosting
 app.get("/", (req, res) => {

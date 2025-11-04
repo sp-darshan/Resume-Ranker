@@ -5,32 +5,34 @@ import { FaStar } from 'react-icons/fa'; // FontAwesome Star
 import axios from 'axios';
 import Navbar from './Navbar';
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
+import { usePayment } from '../hooks/usePayment.js';
 
 export default function Pricing() {
   const [tokens, setTokens] = useState(0);
   const { tokens: credits, loading} = useAuthToken() 
+  const { handlePayment, loading:paymentloading } = usePayment()
 
   const plans = [
     {
         name: "Starter",
-        price: `${tokens > 0 ? tokens : 2} Token(s)`,
-        rupees: "₹20",
+        price: 2,
+        rupees: 20,
         period: "",
         description: "Perfect for small teams and startups",
         popular: false
     },
     {
         name: "Professional",
-        price: "10 Token(s)",
-        rupees: "₹90",
+        price: 10,
+        rupees: 90,
         period: "",
         description: "Ideal for growing companies",
         popular: true
     },
     {
         name: "Enterprise",
-        price: "20 Token(s)",
-        rupees: "₹175",
+        price: 20,
+        rupees: 175,
         period: "",
         description: "For large organizations with high volume needs",
         popular: false
@@ -88,8 +90,8 @@ export default function Pricing() {
                   <p className="text-gray-600 mb-6">{plan.description}</p>
                   
                   <div className="flex items-baseline mb-8">
-                    <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
-                    {plan.rupees && <span className="text-lg text-gray-600 ml-2">{plan.rupees}</span>}
+                    <span className="text-3xl font-bold text-gray-900">{plan.price} Token(s)</span>
+                    {plan.rupees && <span className="text-lg text-gray-600 ml-2">₹{plan.rupees}</span>}
                     {!plan.rupees && plan.period && <span className="text-lg text-gray-600 ml-2">{plan.period}</span>}
                   </div>
                   
@@ -99,6 +101,8 @@ export default function Pricing() {
                       ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white hover:from-violet-600 hover:to-blue-600 shadow-lg hover:shadow-xl'
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                     }`}
+                    onClick={() => handlePayment(plan.rupees, plan.price)}
+                    disabled={paymentloading}
                   >
                     {plan.popular ? 'Start Free Trial' : 'Get Started'}
                   </button>
