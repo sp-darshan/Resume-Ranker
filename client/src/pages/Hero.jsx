@@ -24,6 +24,7 @@ export default function Hero() {
   const [hovered, setHovered] = useState('center')
   const navigate = useNavigate()
   const { isSignedIn } = useUser()
+  const { openSignIn } = useClerk()
 
   const zMap = {
     center: 20,
