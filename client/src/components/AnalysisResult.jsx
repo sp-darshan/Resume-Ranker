@@ -57,7 +57,7 @@ export default function ResumeResultModal({ scoreData, onClose }) {
                 </h3>
 
                 {scoreData.job_match_summary && (
-                  <p className="text-gray-700 mb-4">{scoreData.job_match_summary}</p>
+                  <p className="text-gray-800 mb-4">{scoreData.job_match_summary}</p>
                 )}
 
                 {/* Scores */}
@@ -101,7 +101,7 @@ export default function ResumeResultModal({ scoreData, onClose }) {
                 {scoreData.missing_keywords?.length > 0 && (
                   <div className="mb-4">
                     <p className="font-semibold text-red-600">Missing Keywords:</p>
-                    <ul className="list-disc ml-5 text-gray-700 text-xs">
+                    <ul className="list-disc ml-5 text-gray-700 text-sm">
                       {scoreData.missing_keywords.map((kw, i) => (
                         <li key={i}>{kw}</li>
                       ))}

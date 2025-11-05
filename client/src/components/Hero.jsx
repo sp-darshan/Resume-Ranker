@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useUser, useClerk } from '@clerk/clerk-react'
-import { FaBrain, FaBolt, FaChartBar } from "react-icons/fa";
+import { FaBrain, FaBolt, FaChartBar, FaArrowRight } from "react-icons/fa";
 import Features from './Features'
 import Contact from './ContactUs'
 import Navbar from './Navbar'
@@ -19,7 +19,6 @@ export default function Hero() {
   const [hovered, setHovered] = useState('center')
   const navigate = useNavigate()
   const { isSignedIn } = useUser()
-  const { openSignIn } = useClerk() // Added to open modal programmatically
 
   const zMap = {
     center: 20,
@@ -105,8 +104,12 @@ export default function Hero() {
                 Upload your Resume
               </button>
 
-              <a href="/#how-it-works" className="mt-2 text-sm font-bold text-gray-900 text-center">
-                How it works →
+              <a
+                href="/#how-it-works"
+                className="flex items-center justify-center gap-2 text-sm font-bold text-gray-900 hover:text-indigo-600 transition"
+              >
+                <span>How it works</span>
+                <FaArrowRight className="text-xs mt-0.75" />
               </a>
             </div>
           </div>

@@ -53,7 +53,7 @@ export default function Pricing() {
               </span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Start with our free trial and scale as your hiring needs grow. 
+              Start and scale as your hiring needs grow. 
               All plans include our core AI-powered resume ranking technology.
             </p>
             {/* Display Tokens */}
@@ -104,7 +104,7 @@ export default function Pricing() {
                     onClick={() => handlePayment(plan.rupees, plan.price)}
                     disabled={paymentloading}
                   >
-                    {plan.popular ? 'Start Free Trial' : 'Get Started'}
+                    Get Started
                   </button>
                 </div>
               </div>
