@@ -12,7 +12,7 @@ Backend API for Resume Ranker. Handles PDF uploads, text extraction, AI analysis
 ```bash
 cd server
 npm install
-npm start
+npm run server
 ```
 
 Default port: (commonly `5000`).
