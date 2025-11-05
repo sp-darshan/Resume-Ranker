@@ -21,12 +21,12 @@ const Contact = () => {
         </h2>
         <p className="mt-4 text-lg text-gray-600">
           Have questions about our AI-powered resume ranking system? 
-          We’d love to hear from you and help optimize your hiring process.
+          We'd love to hear from you and help optimize your hiring process.
         </p>
       </div>
 
       {/* Contact Section */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 px-6">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 px-4 sm:px-6">
         {/* Left Side */}
         <div className="space-y-8">
           {/* Email */}
