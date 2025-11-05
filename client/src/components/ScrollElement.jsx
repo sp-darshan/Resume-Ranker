@@ -11,7 +11,7 @@ export default function ScrollToHashElement() {
         el.scrollIntoView({ behavior: "smooth" });
       }
     } else {
-      // optional: scroll to top on route change without hash
+      // scroll to top on route change without hash
       window.scrollTo(0, 0);
     }
   }, [pathname, hash]);

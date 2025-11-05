@@ -88,7 +88,7 @@ export function AuthTokenProvider({ children }) {
     }
   }
 
-  // Refresh tokens (alias for fetchTokens)
+  // Refresh tokens
   const refreshTokens = () => fetchTokens()
 
   // Manual token update (for immediate UI updates)
@@ -130,7 +130,7 @@ export function useAuthToken() {
   return context
 }
 
-// Legacy exports for backward compatibility (if needed)
+// Legacy exports for backward compatibility
 export const useClerkJwtAndCredits = () => {
   const { jwt, tokens: credits, loading, error, refreshTokens } = useAuthToken()
   return { jwt, credits, loading, error, refetchCredits: refreshTokens }

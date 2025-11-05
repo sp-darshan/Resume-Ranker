@@ -90,7 +90,7 @@ const deductTokens = async (req, res) => {
     const clerkId = req.user?.sub
     if (!clerkId) return res.status(401).json({ message: 'Unauthorized: No user ID found' })
 
-    // Safely read amount; default = 2
+    // Safely deduct amount; default = 2
     const raw = req.body && Object.prototype.hasOwnProperty.call(req.body, 'amount') ? req.body.amount : undefined
     const amount = raw === undefined ? 2 : Math.max(1, parseInt(raw, 10) || 0)
     if (amount <= 0) return res.status(400).json({ message: 'Invalid amount' })

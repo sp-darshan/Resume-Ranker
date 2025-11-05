@@ -53,7 +53,7 @@ export const analyzeResume = async (req, res) => {
     // Step 3: Job description (optional)
     const jobDescription = req.body?.jobDescription || null;
 
-    // Step 4: Build prompt — short and score-focused
+    // Step 4: Build prompt - short and score-focused
     let prompt;
     if (jobDescription) {
       prompt = `
@@ -62,14 +62,14 @@ export const analyzeResume = async (req, res) => {
 
       ### TASK:
       Extract and evaluate the following fields:
-      1. **overall_score** (0–100)
-      2. **ats_compatibility_score** (0–100)
-      3. **keyword_match_score** (0–100)
+      1. **overall_score** (0-100)
+      2. **ats_compatibility_score** (0-100)
+      3. **keyword_match_score** (0-100)
       4. **missing_keywords**: [list of missing important terms from the job description]
       5. **skills_extracted**: { "technical": [], "soft": [], "domain": [] }
       6. **experience_analysis**: {
             "total_years": number,
-            "relevant_experience": short summary (2–3 lines),
+            "relevant_experience": short summary (2-3 lines),
             "action_verbs_used": number,
             "quantified_results": number
         }
@@ -77,10 +77,10 @@ export const analyzeResume = async (req, res) => {
             "degree": string,
             "relevance_to_job": string (e.g., "Highly relevant", "Partially relevant", "Not relevant")
         }
-      8. **formatting_score** (0–100)
-      9. **readability_score** (0–100)
-      10. **job_match_summary**: short paragraph (40–60 words) summarizing overall fit
-      11. **recommendations**: [3–5 bullet points on how to improve resume for this job]
+      8. **formatting_score** (0-100)
+      9. **readability_score** (0-100)
+      10. **job_match_summary**: short paragraph (40-60 words) summarizing overall fit
+      11. **recommendations**: [3-5 bullet points on how to improve resume for this job]
 
       Return response in **STRICT JSON format** only, no Markdown, no commentary.
 
@@ -128,8 +128,8 @@ export const analyzeResume = async (req, res) => {
 
       ### TASK:
       Extract and evaluate the following fields:
-      1. **overall_score** (0–100)
-      2. **ats_compatibility_score** (0–100)
+      1. **overall_score** (0-100)
+      2. **ats_compatibility_score** (0-100)
       3. **skills_extracted**: { "technical": [], "soft": [], "domain": [] }
       4. **experience_analysis**: {
             "total_years": number,
@@ -142,10 +142,10 @@ export const analyzeResume = async (req, res) => {
             "institution": string,
             "relevance_to_industry": string
         }
-      6. **formatting_score** (0–100)
-      7. **readability_score** (0–100)
-      8. **general_comment**: short paragraph (40–60 words)
-      9. **recommendations**: [3–5 points for improvement]
+      6. **formatting_score** (0-100)
+      7. **readability_score** (0-100)
+      8. **general_comment**: short paragraph (40-60 words)
+      9. **recommendations**: [3-5 points for improvement]
 
       Return response in **STRICT JSON format** only.
 
