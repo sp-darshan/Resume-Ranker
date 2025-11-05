@@ -50,7 +50,7 @@ export default function Hero() {
           {/* Mobile view: Single centered image */}
           <div className="sm:hidden w-full flex justify-center mt-4">
             <img
-              src="/Hero2.jpg"
+              src={Hero2}
               alt="Resume Preview"
               className="w-64 h-[380px] object-cover rounded-xl border border-gray-300 bg-white shadow-lg"
             />
