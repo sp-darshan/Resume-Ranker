@@ -23,7 +23,7 @@ export function AuthTokenProvider({ children }) {
     try {
       const token = await getToken()
       setJwt(token)
-
+      console.log('JWT TOken:',token)
       if (!token || !user) {
         setTokens(null)
         setLoading(false)

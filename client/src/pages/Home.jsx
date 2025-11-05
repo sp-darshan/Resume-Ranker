@@ -17,7 +17,7 @@ export default function Home() {
   const [scoreData, setScoreData] = useState(null)
   const [lloading, setLoading] = useState(false)
   const { isSignedIn, user } = useUser()
-  const { tokens, loading: tokenLoading, deductTokens } = useAuthToken()
+  const { tokens, loading: tokenLoading, jwt, deductTokens } = useAuthToken()
 
 
   const handleFileChange = (e) => {
@@ -40,7 +40,12 @@ export default function Home() {
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/analyze`,
         formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        { 
+          headers: { 
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${jwt}`
+          } 
+        }
       )
 
       if (res.status === 200 && res.data?.analysis) {
