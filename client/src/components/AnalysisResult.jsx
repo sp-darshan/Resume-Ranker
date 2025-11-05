@@ -25,7 +25,7 @@ export default function ResumeResultModal({ scoreData, onClose }) {
             relative w-full max-w-2xl max-h-[85vh]
             rounded-2xl shadow-2xl bg-white text-gray-800
             overflow-hidden
-            mx-4 sm:mx-6
+            mx-2 sm:mx-4
           "
         >
           {/* Inner scroll wrapper */}
