@@ -1,8 +1,8 @@
-import Hero from './components/Hero'
-import Home from './components/Home'
+import Hero from './pages/Hero'
+import Home from './pages/Home'
 import ScrollToHashElement from './components/ScrollElement'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import Pricing from './components/Pricing'
+import Pricing from './pages/Pricing'
 import { Toaster } from 'react-hot-toast'
 
 import './index.css'  // ensure Tailwind is imported

@@ -1,13 +1,13 @@
 'use client'
 
-import Navbar from './Navbar'
-import Hero from './Hero'
+import Navbar from '../components/Navbar.jsx'
+import Hero from './Hero.jsx'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Upload } from 'lucide-react'
 import { useUser } from '@clerk/clerk-react'
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
-import AnalysisResult from './AnalysisResult.jsx'
+import AnalysisResult from '../components/AnalysisResult.jsx'
 import toast from 'react-hot-toast'
 
 

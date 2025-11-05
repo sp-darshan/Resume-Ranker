@@ -4,16 +4,21 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useUser, useClerk } from '@clerk/clerk-react'
 import { FaBrain, FaBolt, FaChartBar, FaArrowRight } from "react-icons/fa";
-import Features from './Features'
-import Contact from './ContactUs'
-import Navbar from './Navbar'
-import HowItWorks from './HowItWorks'
+import Features from '../components/Features'
+import Contact from '../components/ContactUs'
+import Navbar from '../components/Navbar'
+import HowItWorks from '../components/HowItWorks'
+
+import Hero1 from '../assets/Hero1.jpg'
+import Hero2 from '../assets/Hero2.jpg'
+import Hero3 from '../assets/Hero3.png'
 
 const cardData = [
-  { id: 'left', src: '/Hero1.jpg', alt: 'Resume 1' },
-  { id: 'center', src: '/Hero2.jpg', alt: 'Resume 2' },
-  { id: 'right', src: '/Hero3.png', alt: 'Resume 3' },
+  { id: 'left', src: Hero1, alt: 'Resume 1' },
+  { id: 'center', src: Hero2, alt: 'Resume 2' },
+  { id: 'right', src: Hero3, alt: 'Resume 3' },
 ]
+
 
 export default function Hero() {
   const [hovered, setHovered] = useState('center')

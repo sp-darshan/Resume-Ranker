@@ -5,6 +5,7 @@ import { Menu, X } from 'lucide-react'
 import { SignInButton, UserButton, useUser } from '@clerk/clerk-react'
 import { useLocation } from 'react-router-dom'
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
+import cvIcon from '../assets/cv.png';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -23,7 +24,7 @@ export default function Navbar() {
           {/* Logo (aligned left for both desktop + mobile) */}
           <a href="/" className="flex items-center pl-2 sm:pl-24 gap-2">
             <img
-              src="/cv.png"
+              src={cvIcon}
               alt="CV Icon"
               className="w-9 h-9 sm:w-10 sm:h-10"
             />

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaStar } from 'react-icons/fa'; // FontAwesome Star
 import axios from 'axios';
-import Navbar from './Navbar';
+import Navbar from '../components/Navbar.jsx';
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
 import { usePayment } from '../hooks/usePayment.js';
 
