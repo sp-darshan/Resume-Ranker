@@ -1,6 +1,7 @@
 import fs from "fs";
 import { PDFParse } from "pdf-parse";
 import { GoogleGenAI } from "@google/genai";
+import User from '../models/userModel.js'
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -16,8 +17,29 @@ export const analyzeResume = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    // Step 0: Check user authentication and tokens
+    const clerkId = req.user?.sub;
+    if (!clerkId) {
+      return res.status(401).json({ message: "Unauthorized: No user ID found" });
+    }
+
+    // Check if user has sufficient tokens BEFORE processing
+    const user = await User.findOne({ uid: clerkId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const requiredTokens = 2;
+    if (user.tokens < requiredTokens) {
+      return res.status(400).json({ 
+        message: "Insufficient tokens", 
+        required: requiredTokens, 
+        available: user.tokens 
+      });
+    }
+
     // Step 1: Read uploaded file
-    const filePath = req.file.path;
+    filePath = req.file.path;
     const pdfBuffer = fs.readFileSync(filePath);
 
     // Step 2: Extract text
@@ -169,7 +191,6 @@ export const analyzeResume = async (req, res) => {
       contents: prompt,
     });
 
-
     // Step 6: Parse clean JSON output
     let text = response.text.trim();
     console.log("Gemini raw response:", text);
@@ -183,22 +204,50 @@ export const analyzeResume = async (req, res) => {
       analysis = { score: null, comment: text };
     }
 
-    // Step 7: Send response
-    res.json({
-      message: jobDescription
-        ? "Resume analyzed against job description successfully"
-        : "Resume analyzed successfully",
-      analysis,
-    });
+    // Step 7: ONLY IF ANALYSIS SUCCEEDS - Deduct tokens atomically
+    if (analysis && (analysis.overall_score !== null && analysis.overall_score !== undefined)) {
+      const updatedUser = await User.findOneAndUpdate(
+        { uid: clerkId, tokens: { $gte: requiredTokens } },
+        { $inc: { tokens: -requiredTokens } },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        // Race condition - someone else used tokens
+        return res.status(400).json({ 
+          message: "Insufficient tokens", 
+          required: requiredTokens,
+          available: user.tokens
+        });
+      }
+
+      console.log(`Tokens deducted successfully. Remaining: ${updatedUser.tokens}`);
+
+      // Step 8: Send successful response with analysis and updated token count
+      res.json({
+        message: jobDescription
+          ? "Resume analyzed against job description successfully"
+          : "Resume analyzed successfully",
+        analysis,
+        tokensDeducted: requiredTokens,
+        remainingTokens: updatedUser.tokens
+      });
+    } else {
+      // Analysis failed - no tokens deducted
+      res.status(500).json({
+        message: "Analysis failed - invalid response from AI model",
+        error: "No valid analysis result generated"
+      });
+    }
+
   } catch (error) {
     console.error("Error analyzing resume:", error);
     res.status(500).json({
       message: "Error analyzing resume",
       error: error.message,
     });
-    // step 8: Temporary files deletion
   } finally {
-    // Always delete file, success or failure
+    // Always delete temporary file
     if (filePath && fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
       console.log("Temporary file deleted:", filePath);

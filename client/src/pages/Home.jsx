@@ -10,15 +10,13 @@ import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
 import AnalysisResult from '../components/AnalysisResult.jsx'
 import toast from 'react-hot-toast'
 
-
 export default function Home() {
   const [pdfFile, setPdfFile] = useState(null)
   const [jobDesc, setJobDesc] = useState('')
   const [scoreData, setScoreData] = useState(null)
   const [lloading, setLoading] = useState(false)
   const { isSignedIn, user } = useUser()
-  const { tokens, loading: tokenLoading, jwt, deductTokens } = useAuthToken()
-
+  const { tokens, loading: tokenLoading, jwt, updateTokens, refreshTokens } = useAuthToken()
 
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0])
@@ -32,11 +30,11 @@ export default function Home() {
     setLoading(true)
 
     try {
-      // Step 1: Analysis first
       const formData = new FormData()
       formData.append('resume', pdfFile)
       formData.append('jobDescription', jobDesc)
 
+      // Call analyze API - tokens will be deducted in backend after successful analysis
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/analyze`,
         formData,
@@ -49,25 +47,34 @@ export default function Home() {
       )
 
       if (res.status === 200 && res.data?.analysis) {
-        const analysis = res.data.analysis
+        const { analysis, remainingTokens } = res.data
 
         if (analysis.overall_score !== null && analysis.overall_score !== undefined) {
-          // Step 2: Deduct tokens after successful analysis
-          const tokenRes = await deductTokens(2)
-          if (!tokenRes.success) {
-            throw new Error(`Token deduction failed: ${tokenRes.error}`)
+          // Update UI with analysis results
+          setScoreData(analysis)
+          
+          // Update tokens immediately with the value returned from backend
+          if (remainingTokens !== undefined) {
+            updateTokens(remainingTokens)
+          } else {
+            // Fallback: refresh tokens from server
+            await refreshTokens()
           }
 
-          // Step 3: Show results (tokens automatically updated in context)
-          setScoreData(analysis)
-          console.log('Analysis completed successfully!')
+          toast.success('Analysis completed successfully!')
         } else {
           throw new Error("Invalid analysis result — no score found.")
         }
       }
     } catch (err) {
       console.error("Error:", err)
-      toast.error(err.message || "Analysis failed")
+      
+      // If it's a token-related error, refresh token count
+      if (err.response?.status === 400 || err.response?.status === 404) {
+        await refreshTokens()
+      }
+      
+      toast.error(err.response?.data?.message || err.message || "Analysis failed")
     } finally {
       setLoading(false)
     }

@@ -10,7 +10,6 @@ export function AuthTokenProvider({ children }) {
   const [jwt, setJwt] = useState(null)
   const [tokens, setTokens] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [deductLoading, setDeductLoading] = useState(false)
   const [error, setError] = useState(null)
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
@@ -23,7 +22,8 @@ export function AuthTokenProvider({ children }) {
     try {
       const token = await getToken()
       setJwt(token)
-      console.log('JWT TOken:',token)
+      console.log('JWT Token:', token)
+      
       if (!token || !user) {
         setTokens(null)
         setLoading(false)
@@ -63,34 +63,6 @@ export function AuthTokenProvider({ children }) {
       setTokens(null)
     } finally {
       setLoading(false)
-    }
-  }
-
-  // Deduct tokens
-  const deductTokens = async (amount = 2) => {
-    setDeductLoading(true)
-    setError(null)
-    
-    try {
-      const token = await getToken()
-      if (!token) throw new Error('Not authenticated')
-
-      const res = await axios.post(
-        `${backendUrl}/api/users/deduct`,
-        { amount },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-
-      // Update local state immediately
-      setTokens(res.data.tokens)
-
-      return { success: true, tokens: res.data.tokens, data: res.data }
-    } catch (err) {
-      const msg = err.response?.data?.message || err.message
-      setError(msg)
-      return { success: false, error: msg, details: err.response?.data }
-    } finally {
-      setDeductLoading(false)
     }
   }
 
@@ -138,11 +110,9 @@ export function AuthTokenProvider({ children }) {
       // Token data
       tokens,
       loading,
-      deductLoading,
       error,
       
       // Token operations
-      deductTokens,
       fetchTokens,
       refreshTokens,
       updateTokens
@@ -164,9 +134,4 @@ export function useAuthToken() {
 export const useClerkJwtAndCredits = () => {
   const { jwt, tokens: credits, loading, error, refreshTokens } = useAuthToken()
   return { jwt, credits, loading, error, refetchCredits: refreshTokens }
-}
-
-export const useToken = () => {
-  const { deductTokens, fetchTokens, deductLoading: loading, error } = useAuthToken()
-  return { deductTokens, fetchTokens, loading, error }
 }
