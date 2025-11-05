@@ -1,5 +1,5 @@
 import express from "express"
-import mongoose from "mongoose";
+import { connectDB } from "./configs/mongodb.js";
 import dotenv from 'dotenv'
 import cors from 'cors'
 import userRoutes from "./routes/userRoutes.js"; 
@@ -24,13 +24,7 @@ app.get("/", (req, res) => {
   res.send("Resume Ranker backend is live and running!");
 });
 
-
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-  dbName: "ResumeRankerDB",
-})
-.then(() => console.log("Connected to MongoDB Atlas"))
-.catch((err) => console.error("MongoDB connection failed:", err));
+await connectDB();
 
 // Start server
 const PORT = process.env.PORT || 5000;

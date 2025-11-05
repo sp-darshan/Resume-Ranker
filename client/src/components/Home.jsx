@@ -8,6 +8,7 @@ import { Upload } from 'lucide-react'
 import { useUser } from '@clerk/clerk-react'
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
 import AnalysisResult from './AnalysisResult.jsx'
+import toast from 'react-hot-toast'
 
 
 export default function Home() {
@@ -24,9 +25,9 @@ export default function Home() {
   }
 
   const handleSubmit = async () => {
-    if (!pdfFile) return alert("Please upload a resume.")
-    if (!isSignedIn) return alert("Please sign in first.")
-    if ((tokens ?? 0) < 2) return alert("Insufficient tokens.")
+    if (!pdfFile) return toast.error("Please upload a resume.")
+    if (!isSignedIn) return toast.error("Please sign in first.")
+    if ((tokens ?? 0) < 2) return toast.error("Insufficient tokens.")
 
     setLoading(true)
 
@@ -54,19 +55,18 @@ export default function Home() {
 
           // Step 3: Show results (tokens automatically updated in context)
           setScoreData(analysis)
-          alert('Analysis completed successfully!')
+          console.log('Analysis completed successfully!')
         } else {
           throw new Error("Invalid analysis result — no score found.")
         }
       }
     } catch (err) {
       console.error("Error:", err)
-      alert(err.message || "Analysis failed")
+      toast.error(err.message || "Analysis failed")
     } finally {
       setLoading(false)
     }
   }
-
 
   return (
     <div className='bg-violet-50'>
@@ -92,18 +92,31 @@ export default function Home() {
           {/* Right Section - Form */}
           <div className="flex-1 bg-white rounded-2xl shadow-xl p-8 w-full max-w-md min-h-[400px]">
             <div className="flex flex-col gap-4">
-              <label className="flex items-center gap-2 mb-2 text-sm text-gray-700">
-                <Upload size={18} className="text-indigo-600" />
-                Upload your resume (PDF)
-              </label>
-              <input
-                type="file"
-                accept=".pdf"
-                onChange={handleFileChange}
-                className="border border-gray-300 rounded-md px-4 mb-2 py-2 text-sm"
-              />
+              <div className="flex flex-col mb-4">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
+                  <Upload size={18} className="text-indigo-600" />
+                  Upload your resume (PDF)
+                </label>
 
-              <label className="text-sm font-medium mb-2 text-gray-700">Optional Job Description</label>
+                {/* Hidden native input */}
+                <input
+                  id="resumeUpload"
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+
+                {/* Custom upload button */}
+                <label
+                  htmlFor="resumeUpload"
+                  className="cursor-pointer flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 hover:bg-gray-100 px-4 py-2 text-sm text-gray-700 shadow-sm transition-all duration-200"
+                >
+                  {pdfFile ? <p className="text-xs text-black-500 font-medium truncate"> {pdfFile.name} </p> : 'Choose File'}
+                </label>
+
+              </div>
+              <label className="text-sm font-medium mb-2 text-gray-700">Job Description (optional) </label>
               <textarea
                 rows={4}
                 className="border border-gray-300 rounded-md px-4 py-2 mb-5 text-sm"

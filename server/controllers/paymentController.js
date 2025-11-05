@@ -7,7 +7,7 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// 1️⃣ Create Razorpay Order
+// Create Razorpay Order
 export const createOrder = async (req, res) => {
   try {
     const { amount } = req.body;
@@ -18,16 +18,16 @@ export const createOrder = async (req, res) => {
     });
     res.status(200).json({ order });
   } catch (error) {
-    console.error("❌ Error creating Razorpay order:", error);
+    console.error("Error creating Razorpay order:", error);
     res.status(500).json({ message: "Error creating Razorpay order" });
   }
 };
 
-// 2️⃣ Verify Payment and Update Tokens
+// Verify Payment and Update Tokens
 export const verifyPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId: email, tokensToAdd } = req.body;
-    console.log("🔹 Verification started");
+    console.log("Verification started");
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res
@@ -46,14 +46,14 @@ export const verifyPayment = async (req, res) => {
     console.log("Received Sign:", razorpay_signature);
 
     if (razorpay_signature !== expectedSign) {
-      console.log("❌ Invalid signature");
+      console.log("Invalid signature");
       return res
         .status(400)
         .json({ success: false, message: "Invalid signature" });
     }
 
-    // ✅ Payment Verified - Now Update User Tokens
-    console.log("✅ Payment verified successfully");
+    // Payment Verified - Now Update User Tokens
+    console.log("Payment verified successfully");
 
     if (!email || !tokensToAdd) {
       return res
@@ -73,14 +73,14 @@ export const verifyPayment = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    console.log(`🎉 Added ${tokensToAdd} tokens to user ${email}`);
+    console.log(`Added ${tokensToAdd} tokens to user ${email}`);
     return res.json({
       success: true,
       message: "Payment verified & tokens added successfully",
       tokens: updatedUser.tokens,
     });
   } catch (error) {
-    console.error("❌ Verify error:", error);
+    console.error("Verify error:", error);
     res
       .status(500)
       .json({ success: false, message: "Server error verifying payment" });

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { useUser } from '@clerk/clerk-react'
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx';
+import toast from 'react-hot-toast';
 
 export function usePayment() {
   const [loading, setLoading] = useState(false)
@@ -46,14 +47,16 @@ export function usePayment() {
               }
             )
             console.log("Verification response:", verifyRes.data);
-            alert(verifyRes.data.message);
             // After successful verification, refresh token balance
             if (verifyRes.data.success) {
               refreshTokens();
+              toast.success(verifyRes.data.message);
+            } else {
+              toast.error(verifyRes.data.message);
             }
           } catch (err) {
             console.error("Verification error:", err.response?.data || err.message);
-            alert("Payment verification failed!");
+            toast.error("Payment verification failed!");
           }
         },
         prefill: {
@@ -69,7 +72,7 @@ export function usePayment() {
       rzp.open()
     } catch (error) {
       console.error('Payment failed:', error)
-      alert('Payment initialization failed')
+      toast.error('Payment initialization failed')
     } finally {
       setLoading(false)
     }
