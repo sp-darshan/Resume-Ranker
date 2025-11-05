@@ -85,7 +85,7 @@ export default function Navbar() {
         <nav className="flex flex-col gap-4 px-6 py-4 text-sm font-medium text-gray-800">
           <a href="/" onClick={() => setMenuOpen(false)}>Home</a>
           <a href="/#features" onClick={() => setMenuOpen(false)}>Features</a>
-          <a href="/#pricing" onClick={() => setMenuOpen(false)}>Pricing</a>
+          <a href="/pricing" onClick={() => setMenuOpen(false)}>Pricing</a>
           <a href="/#contact" onClick={() => setMenuOpen(false)}>Contact Us</a>
         </nav>
       </div>
