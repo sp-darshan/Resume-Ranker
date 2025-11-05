@@ -118,12 +118,12 @@ export default function Pricing() {
               For enterprises with specific requirements, we offer custom AI models, dedicated infrastructure, and personalized support packages.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button className="bg-gradient-to-r from-violet-500 to-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-violet-600 hover:to-blue-600 transition-all duration-300">
+              <a href="/#contact" className="bg-gradient-to-r from-violet-500 to-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-violet-600 hover:to-blue-600 transition-all duration-300">
                 Contact Sales
-              </button>
-              <button className="border-2 border-violet-500 text-violet-500 px-6 py-3 rounded-lg font-semibold hover:bg-violet-50 transition-all duration-300">
+              </a>
+              <a href="/#contact" className="border-2 border-violet-500 text-violet-500 px-6 py-3 rounded-lg font-semibold hover:bg-violet-50 transition-all duration-300">
                 Schedule Demo
-              </button>
+              </a>
             </div>
           </div>
 
