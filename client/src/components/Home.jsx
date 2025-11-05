@@ -7,6 +7,7 @@ import axios from 'axios'
 import { Upload } from 'lucide-react'
 import { useUser } from '@clerk/clerk-react'
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
+import AnalysisResult from './AnalysisResult.jsx'
 
 
 export default function Home() {
@@ -42,9 +43,9 @@ export default function Home() {
       )
 
       if (res.status === 200 && res.data?.analysis) {
-        const { score, comment } = res.data.analysis
+        const analysis = res.data.analysis
 
-        if (score !== null && score !== undefined) {
+        if (analysis.overall_score !== null && analysis.overall_score !== undefined) {
           // Step 2: Deduct tokens after successful analysis
           const tokenRes = await deductTokens(2)
           if (!tokenRes.success) {
@@ -52,8 +53,10 @@ export default function Home() {
           }
 
           // Step 3: Show results (tokens automatically updated in context)
-          setScoreData({ score, feedback: comment })
+          setScoreData(analysis)
           alert('Analysis completed successfully!')
+        } else {
+          throw new Error("Invalid analysis result — no score found.")
         }
       }
     } catch (err) {
@@ -120,13 +123,11 @@ export default function Home() {
               <a href='/pricing' className='text-xs block text-center text-violet-500'>Need Tokens ?</a>
             </div>
 
-            {/* Score Section */}
-            {scoreData && (
-              <div className="mt-6 border border-gray-200 p-4 rounded-md bg-gray-50 animate-fade-in">
-                <h3 className="text-lg font-bold text-indigo-700">Score: {scoreData.score}/100</h3>
-                <p className="text-gray-700 mt-2 whitespace-pre-line">{scoreData.feedback}</p>
-              </div>
-            )}
+            {/* Analysis Result section */}
+            <AnalysisResult
+              scoreData={scoreData}
+              onClose={() => setScoreData(null)}
+            />
           </div>
         </div>
       </div>

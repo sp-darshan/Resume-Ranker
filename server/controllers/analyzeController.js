@@ -35,41 +35,132 @@ export const analyzeResume = async (req, res) => {
     let prompt;
     if (jobDescription) {
       prompt = `
-        You are an AI resume evaluator.
-        Compare the resume to the following job description and provide:
-        1. A suitability score between 0–100 (integer only)
-        2. A very short comment (10–20 words) summarizing fit/strength/weakness.
+      You are an AI Resume Analysis Engine integrated into an ATS system.
+      Compare the following RESUME with the JOB DESCRIPTION and return a detailed JSON analysis.
 
-        --- Resume ---
-        ${resumeText}
-
-        --- Job Description ---
-        ${jobDescription}
-
-        Respond in strict JSON format like:
-        {
-          "score": 85,
-          "comment": "Strong in ML and Python but lacks cloud experience."
+      ### TASK:
+      Extract and evaluate the following fields:
+      1. **overall_score** (0–100)
+      2. **ats_compatibility_score** (0–100)
+      3. **keyword_match_score** (0–100)
+      4. **missing_keywords**: [list of missing important terms from the job description]
+      5. **skills_extracted**: { "technical": [], "soft": [], "domain": [] }
+      6. **experience_analysis**: {
+            "total_years": number,
+            "relevant_experience": short summary (2–3 lines),
+            "action_verbs_used": number,
+            "quantified_results": number
         }
-      `;
-    } else {
-      prompt = `
-        You are an AI resume evaluator.
-        Based on the resume alone, provide:
-        1. An overall quality score between 0–100 (integer only)
-        2. A brief (10–20 words) professional comment on the resume.
-
-        --- Resume ---
-        ${resumeText}
-
-        Respond in strict JSON format like:
-        {
-          "score": 90,
-          "comment": "Excellent academic and ML experience, strong technical foundation."
+      7. **education_analysis**: {
+            "degree": string,
+            "relevance_to_job": string (e.g., "Highly relevant", "Partially relevant", "Not relevant")
         }
+      8. **formatting_score** (0–100)
+      9. **readability_score** (0–100)
+      10. **job_match_summary**: short paragraph (40–60 words) summarizing overall fit
+      11. **recommendations**: [3–5 bullet points on how to improve resume for this job]
+
+      Return response in **STRICT JSON format** only, no Markdown, no commentary.
+
+      ### RESUME:
+      ${resumeText}
+
+      ### JOB DESCRIPTION:
+      ${jobDescription}
+
+      Expected output:
+      {
+        "overall_score": 82,
+        "ats_compatibility_score": 90,
+        "keyword_match_score": 76,
+        "missing_keywords": ["AWS", "CI/CD", "Microservices"],
+        "skills_extracted": {
+          "technical": ["Python", "TensorFlow", "React"],
+          "soft": ["Leadership", "Communication"],
+          "domain": ["AI", "Cybersecurity"]
+        },
+        "experience_analysis": {
+          "total_years": 3,
+          "relevant_experience": "Worked on ML model deployment using TensorFlow and FastAPI.",
+          "action_verbs_used": 14,
+          "quantified_results": 4
+        },
+        "education_analysis": {
+          "degree": "B.Tech in Computer Science",
+          "relevance_to_job": "Highly relevant"
+        },
+        "formatting_score": 88,
+        "readability_score": 80,
+        "job_match_summary": "Strong ML and Python background, good fit for AI roles but lacks cloud tools.",
+        "recommendations": [
+          "Add AWS or cloud-related experience.",
+          "Quantify achievements with metrics.",
+          "Include CI/CD pipeline experience."
+        ]
+      }
+        `;
+      } else {
+        prompt = `
+      You are an AI Resume Analysis Engine.
+      Analyze the following RESUME and return a detailed JSON analysis focusing on overall quality and ATS-readiness.
+
+      ### TASK:
+      Extract and evaluate the following fields:
+      1. **overall_score** (0–100)
+      2. **ats_compatibility_score** (0–100)
+      3. **skills_extracted**: { "technical": [], "soft": [], "domain": [] }
+      4. **experience_analysis**: {
+            "total_years": number,
+            "action_verbs_used": number,
+            "quantified_results": number,
+            "summary": short description
+        }
+      5. **education_analysis**: {
+            "degree": string,
+            "institution": string,
+            "relevance_to_industry": string
+        }
+      6. **formatting_score** (0–100)
+      7. **readability_score** (0–100)
+      8. **general_comment**: short paragraph (40–60 words)
+      9. **recommendations**: [3–5 points for improvement]
+
+      Return response in **STRICT JSON format** only.
+
+      ### RESUME:
+      ${resumeText}
+
+      Expected output:
+      {
+        "overall_score": 85,
+        "ats_compatibility_score": 92,
+        "skills_extracted": {
+          "technical": ["Python", "SQL", "React"],
+          "soft": ["Teamwork", "Communication"],
+          "domain": ["Data Analysis"]
+        },
+        "experience_analysis": {
+          "total_years": 2,
+          "action_verbs_used": 10,
+          "quantified_results": 3,
+          "summary": "Hands-on with ML and web development projects."
+        },
+        "education_analysis": {
+          "degree": "B.Tech in Computer Science",
+          "institution": "XYZ University",
+          "relevance_to_industry": "Highly relevant"
+        },
+        "formatting_score": 88,
+        "readability_score": 84,
+        "general_comment": "Good overall structure and readability; could improve metrics in experience section.",
+        "recommendations": [
+          "Add quantified achievements.",
+          "Highlight technical certifications.",
+          "Keep consistent formatting across sections."
+        ]
+      }
       `;
     }
-
     console.log("Sending to Gemini model...");
 
     // Step 5: Use Gemini API
