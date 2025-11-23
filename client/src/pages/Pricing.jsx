@@ -1,16 +1,29 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { FaStar } from 'react-icons/fa'; // FontAwesome Star
+import { FaStar } from 'react-icons/fa'; 
 import axios from 'axios';
 import Navbar from '../components/Navbar.jsx';
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
 import { usePayment } from '../hooks/usePayment.js';
+import { useUser, useClerk } from '@clerk/clerk-react'
+import toast from "react-hot-toast";
 
 export default function Pricing() {
   const [tokens, setTokens] = useState(0);
   const { tokens: credits, loading} = useAuthToken() 
   const { handlePayment, loading:paymentloading } = usePayment()
+  const { isSignedIn } = useUser()
+  const { openSignIn } = useClerk()
+
+  const handleGetStarted = (rupees, tokenAmount) => {
+    if (!isSignedIn) {
+      toast.error("Please sign in to purchase tokens")
+      openSignIn({ redirectUrl: '/pricing' })
+      return
+    }
+    handlePayment(rupees, tokenAmount)
+  }
 
   const plans = [
     {
@@ -56,13 +69,14 @@ export default function Pricing() {
               Start and scale as your hiring needs grow. 
               All plans include our core AI-powered resume ranking technology.
             </p>
-            {/* Display Tokens */}
-            <p className="mt-4 text-lg font-semibold">
-              Tokens Remaining:{" "}
-              <span className={`${credits === 0 ? 'text-red-600' : 'text-violet-600'}`}>
-                {loading ? '...' : credits ?? 0}
-              </span>
-            </p>
+            {isSignedIn && (
+              <p className="mt-4 text-lg font-semibold">
+                Tokens Remaining:{" "}
+                <span className={`${credits === 0 ? 'text-red-600' : 'text-violet-600'}`}>
+                  {loading ? '...' : credits ?? 0}
+                </span>
+              </p>
+            )}            
           </div>
 
           {/* Plans Grid */}
@@ -101,7 +115,7 @@ export default function Pricing() {
                       ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white hover:from-violet-600 hover:to-blue-600 shadow-lg hover:shadow-xl'
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                     }`}
-                    onClick={() => handlePayment(plan.rupees, plan.price)}
+                    onClick={() => handleGetStarted(plan.rupees, plan.price)}
                     disabled={paymentloading}
                   >
                     Get Started
