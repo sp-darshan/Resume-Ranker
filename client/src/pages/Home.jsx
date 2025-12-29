@@ -39,7 +39,7 @@ export default function Home() {
       const freshToken = await getToken()
 
       const res = await axios.post(
-        import.meta.env.VITE_BACKEND_URL ||'http://localhost:5000/api/analyze',
+        `${import.meta.env.VITE_BACKEND_URL ||'http://localhost:5000'}/api/analyze`,
         formData,
         {
           headers: {
