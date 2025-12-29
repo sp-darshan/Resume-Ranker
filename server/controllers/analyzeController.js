@@ -58,31 +58,76 @@ export const analyzeResume = async (req, res) => {
     if (jobDescription) {
       prompt = `
       You are an AI Resume Analysis Engine integrated into an ATS system.
-      Compare the following RESUME with the JOB DESCRIPTION and return a detailed JSON analysis.
+
+      Your evaluation must follow a STRICT, DETERMINISTIC, and MENTOR-STYLE grading pattern.
+
+      **CRITICAL EVALUATION RULES (MANDATORY):**
+      - **Be direct, critical, and professional. No sugarcoating.**
+      - **Do NOT assume skills, intent, or potential. Evaluate ONLY what is explicitly written.**
+      - **Penalize missing keywords, vague experience, weak alignment, and poor formatting heavily.**
+      - **Scores MUST NOT fluctuate across multiple runs for identical input.**
+      - **Partial matches receive partial credit. Inferred skills receive ZERO credit.**
+      - **If evidence is weak or absent, score low.**
+
+      **Compare the following RESUME with the JOB DESCRIPTION and return a detailed JSON analysis.**
 
       ### TASK:
       Extract and evaluate the following fields:
-      1. **overall_score** (0-100)
-      2. **ats_compatibility_score** (0-100)
-      3. **keyword_match_score** (0-100)
-      4. **missing_keywords**: [list of missing important terms from the job description]
-      5. **skills_extracted**: { "technical": [], "soft": [], "domain": [] }
-      6. **experience_analysis**: {
-            "total_years": number,
-            "relevant_experience": short summary (2-3 lines),
-            "action_verbs_used": number,
-            "quantified_results": number
-        }
-      7. **education_analysis**: {
-            "degree": string,
-            "relevance_to_job": string (e.g., "Highly relevant", "Partially relevant", "Not relevant")
-        }
-      8. **formatting_score** (0-100)
-      9. **readability_score** (0-100)
-      10. **job_match_summary**: short paragraph (40-60 words) summarizing overall fit
-      11. **recommendations**: [3-5 bullet points on how to improve resume for this job]
 
-      Return response in **STRICT JSON format** only, no Markdown, no commentary.
+      1. **overall_score (0-100)**
+        - Fixed composite score based on skills match, experience relevance, education alignment, and ATS readiness.
+
+      2. **ats_compatibility_score (0-100)**
+        - Based on structure, section clarity, ATS parsability, and absence of ATS-breaking elements.
+
+      3. **keyword_match_score (0-100)**
+        - Based on exact and semantic overlap with the job description.
+        - Penalize missing critical technical and domain terms.
+
+      4. **missing_keywords**
+        - List of important technical, domain, and tool-related terms present in the JOB DESCRIPTION but absent from the RESUME.
+
+      5. **skills_extracted**
+      {
+        "technical": [],
+        "soft": [],
+        "domain": []
+      }
+        - Extract ONLY explicitly stated skills.
+        - Do NOT infer skills from project titles or degree names.
+
+      6. **experience_analysis**
+      {
+        "total_years": number,
+        "relevant_experience": "2-3 line factual summary aligned strictly to the job description",
+        "action_verbs_used": number,
+        "quantified_results": number
+      }
+        - Count only resume-visible experience.
+        - Projects/internships count only if clearly scoped and described.
+
+      7. **education_analysis**
+      {
+        "degree": "string",
+        "relevance_to_job": "Highly relevant | Partially relevant | Not relevant"
+      }
+
+      8. **formatting_score (0-100)**
+        - Penalize dense text, inconsistent headings, weak sectioning, or non-standard formatting.
+
+      9. **readability_score (0-100)**
+        - Based on clarity, conciseness, grammar, and technical precision.
+
+      10. **job_match_summary**
+        - 40-60 words.
+        - Neutral, ATS-style assessment of overall fit. No encouragement.
+
+      11. **recommendations**
+        - 3-5 critical, actionable improvements required to increase shortlisting chances.
+        - No generic advice.
+
+      Return response in **STRICT JSON format only, No Markdown, No commentary.**
+      
 
       ### RESUME:
       ${resumeText}

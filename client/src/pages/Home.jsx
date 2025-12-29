@@ -5,7 +5,7 @@ import Hero from './Hero.jsx'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Upload } from 'lucide-react'
-import { useUser } from '@clerk/clerk-react'
+import { useUser, useAuth } from '@clerk/clerk-react'
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
 import AnalysisResult from '../components/AnalysisResult.jsx'
 import toast from 'react-hot-toast'
@@ -17,6 +17,7 @@ export default function Home() {
   const [lloading, setLoading] = useState(false)
   const { isSignedIn, user } = useUser()
   const { tokens, loading: tokenLoading, jwt, updateTokens, refreshTokens } = useAuthToken()
+  const { getToken } = useAuth()
 
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0])
@@ -35,14 +36,16 @@ export default function Home() {
       formData.append('jobDescription', jobDesc)
 
       // Call analyze API - tokens will be deducted in backend after successful analysis
+      const freshToken = await getToken()
+
       const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/analyze`,
+        import.meta.env.VITE_BACKEND_URL ||'http://localhost:5000/api/analyze',
         formData,
-        { 
-          headers: { 
+        {
+          headers: {
             'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${jwt}`
-          } 
+            Authorization: `Bearer ${freshToken}`
+          }
         }
       )
 

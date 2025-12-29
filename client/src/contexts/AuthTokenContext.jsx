@@ -7,7 +7,6 @@ const AuthTokenContext = createContext()
 export function AuthTokenProvider({ children }) {
   const { getToken } = useAuth()
   const { user } = useUser()
-  const [jwt, setJwt] = useState(null)
   const [tokens, setTokens] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -21,7 +20,6 @@ export function AuthTokenProvider({ children }) {
 
     try {
       const token = await getToken()
-      setJwt(token)
       console.log('JWT Token:', token)
       
       if (!token || !user) {
@@ -104,7 +102,6 @@ export function AuthTokenProvider({ children }) {
   return (
     <AuthTokenContext.Provider value={{
       // Auth data
-      jwt,
       user,
       
       // Token data
