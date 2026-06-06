@@ -8,6 +8,7 @@ import { Upload } from 'lucide-react'
 import { useUser, useAuth } from '@clerk/clerk-react'
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
 import AnalysisResult from '../components/AnalysisResult.jsx'
+import PageLoadingScreen from '../components/PageLoadingScreen.jsx'
 import toast from 'react-hot-toast'
 
 export default function Home() {
@@ -18,6 +19,23 @@ export default function Home() {
   const { isSignedIn, user } = useUser()
   const { tokens, loading: tokenLoading, jwt, updateTokens, refreshTokens } = useAuthToken()
   const { getToken } = useAuth()
+  const showTokenLoading = isSignedIn && tokenLoading
+
+  if (showTokenLoading) {
+    return (
+      <div className='bg-violet-50 min-h-screen'>
+        <Navbar />
+
+        <div className="w-full min-h-[calc(100vh-5rem)] px-4 sm:px-8 pt-28 sm:pt-32 flex items-center justify-center">
+          <PageLoadingScreen
+            title="Loading your resume workspace"
+            subtitle="Fetching your token balance and preparing the upload experience."
+            fullScreen={false}
+          />
+        </div>
+      </div>
+    )
+  }
 
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0])

@@ -1,18 +1,16 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import { FaStar } from 'react-icons/fa'; 
-import axios from 'axios';
-import Navbar from '../components/Navbar.jsx';
+import React from 'react'
+import { FaStar } from 'react-icons/fa'
+import Navbar from '../components/Navbar.jsx'
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
-import { usePayment } from '../hooks/usePayment.js';
+import { usePayment } from '../hooks/usePayment.js'
 import { useUser, useClerk } from '@clerk/clerk-react'
-import toast from "react-hot-toast";
+import toast from 'react-hot-toast'
 
 export default function Pricing() {
-  const [tokens, setTokens] = useState(0);
-  const { tokens: credits, loading} = useAuthToken() 
-  const { handlePayment, loading:paymentloading } = usePayment()
+  const { tokens: credits, loading: tokenLoading } = useAuthToken()
+  const { handlePayment, loading: paymentloading } = usePayment()
   const { isSignedIn } = useUser()
   const { openSignIn } = useClerk()
 
@@ -22,6 +20,12 @@ export default function Pricing() {
       openSignIn({ redirectUrl: '/pricing' })
       return
     }
+
+    if (tokenLoading) {
+      toast.error("Please wait while we fetch your tokens.")
+      return
+    }
+
     handlePayment(rupees, tokenAmount)
   }
 
@@ -73,7 +77,7 @@ export default function Pricing() {
               <p className="mt-4 text-lg font-semibold">
                 Tokens Remaining:{" "}
                 <span className={`${credits === 0 ? 'text-red-600' : 'text-violet-600'}`}>
-                  {loading ? '...' : credits ?? 0}
+                  {tokenLoading ? '...' : credits ?? 0}
                 </span>
               </p>
             )}            

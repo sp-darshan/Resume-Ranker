@@ -1,4 +1,4 @@
-import { useEffect, useState, createContext, useContext } from 'react'
+import { useEffect, useRef, useState, createContext, useContext } from 'react'
 import { useAuth, useUser } from '@clerk/clerk-react'
 import axios from 'axios'
 
@@ -10,11 +10,40 @@ export function AuthTokenProvider({ children }) {
   const [tokens, setTokens] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const retryTimerRef = useRef(null)
+  const isMountedRef = useRef(true)
+  const retryAttemptRef = useRef(0)
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 
+  const clearRetryTimer = () => {
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current)
+      retryTimerRef.current = null
+    }
+  }
+
+  const scheduleRetry = (callback) => {
+    clearRetryTimer()
+
+    const delay = Math.min(1000 * (2 ** retryAttemptRef.current), 10000)
+    retryAttemptRef.current += 1
+
+    retryTimerRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        callback()
+      }
+    }, delay)
+  }
+
+  const isRetryableBackendError = (err) => {
+    if (!err?.response) return true
+    return err.response.status >= 500
+  }
+
   // Register user and fetch initial tokens
   const registerAndFetchTokens = async () => {
+    clearRetryTimer()
     setLoading(true)
     setError(null)
 
@@ -53,19 +82,30 @@ export function AuthTokenProvider({ children }) {
       })
 
       setTokens(tokensResponse.data.tokens)
+      retryAttemptRef.current = 0
       console.log('User tokens:', tokensResponse.data.tokens)
 
     } catch (err) {
       console.error('Error in registerAndFetchTokens:', err.response?.data || err.message)
+
+      if (isRetryableBackendError(err)) {
+        setError(err.response?.data || err.message)
+        scheduleRetry(registerAndFetchTokens)
+        return
+      }
+
       setError(err.response?.data || err.message)
       setTokens(null)
     } finally {
-      setLoading(false)
+      if (isMountedRef.current && !retryTimerRef.current) {
+        setLoading(false)
+      }
     }
   }
 
   // Fetch current tokens (for manual refresh)
   const fetchTokens = async () => {
+    clearRetryTimer()
     setLoading(true)
     try {
       const token = await getToken()
@@ -76,13 +116,22 @@ export function AuthTokenProvider({ children }) {
       })
 
       setTokens(res.data.tokens)
+      retryAttemptRef.current = 0
       return { success: true, tokens: res.data.tokens }
     } catch (err) {
       const msg = err.response?.data?.message || err.message
       setError(msg)
+
+      if (isRetryableBackendError(err)) {
+        scheduleRetry(fetchTokens)
+        return { success: false, error: msg }
+      }
+
       return { success: false, error: msg }
     } finally {
-      setLoading(false)
+      if (isMountedRef.current && !retryTimerRef.current) {
+        setLoading(false)
+      }
     }
   }
 
@@ -96,7 +145,12 @@ export function AuthTokenProvider({ children }) {
 
   // Initial registration and token fetch
   useEffect(() => {
+    isMountedRef.current = true
     registerAndFetchTokens()
+
+    return () => {
+      clearRetryTimer()
+    }
   }, [getToken, user])
 
   return (
