@@ -1,5 +1,6 @@
 import Hero from './pages/Hero'
 import Home from './pages/Home'
+import Dashboard from './pages/Dashboard'
 import ScrollToHashElement from './components/ScrollElement'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import Pricing from './pages/Pricing'
@@ -26,6 +27,8 @@ function App() {
     <Routes>
       <Route path="/" element={<Hero />} />
       <Route path="/upload" element={<Home />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard/:analysisId" element={<Dashboard />} />
       <Route path="/pricing" element={<Pricing />} />
     </Routes>
   </> 

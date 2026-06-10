@@ -2,23 +2,24 @@
 
 import Navbar from '../components/Navbar.jsx'
 import Hero from './Hero.jsx'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import axios from 'axios'
 import { Upload } from 'lucide-react'
 import { useUser, useAuth } from '@clerk/clerk-react'
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx'
-import AnalysisResult from '../components/AnalysisResult.jsx'
 import PageLoadingScreen from '../components/PageLoadingScreen.jsx'
+import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
 export default function Home() {
   const [pdfFile, setPdfFile] = useState(null)
+  const [jdFile, setJdFile] = useState(null)
   const [jobDesc, setJobDesc] = useState('')
-  const [scoreData, setScoreData] = useState(null)
   const [lloading, setLoading] = useState(false)
   const { isSignedIn, user } = useUser()
   const { tokens, loading: tokenLoading, jwt, updateTokens, refreshTokens } = useAuthToken()
   const { getToken } = useAuth()
+  const navigate = useNavigate()
   const showTokenLoading = isSignedIn && tokenLoading
 
   if (showTokenLoading) {
@@ -38,7 +39,31 @@ export default function Home() {
   }
 
   const handleFileChange = (e) => {
-    setPdfFile(e.target.files[0])
+    const selectedFile = e.target.files[0]
+    if (!selectedFile) return
+
+    const isAllowedResume = /\.(pdf|docx)$/i.test(selectedFile.name)
+    if (!isAllowedResume) {
+      e.target.value = ''
+      toast.error('Please upload a PDF or DOCX resume only.')
+      return
+    }
+
+    setPdfFile(selectedFile)
+  }
+
+  const handleJdFileChange = (e) => {
+    const selectedFile = e.target.files[0]
+    if (!selectedFile) return
+
+    const isAllowedJd = /\.(pdf|docx)$/i.test(selectedFile.name)
+    if (!isAllowedJd) {
+      e.target.value = ''
+      toast.error('Please upload a PDF or DOCX JD only.')
+      return
+    }
+
+    setJdFile(selectedFile)
   }
 
   const handleSubmit = async () => {
@@ -51,13 +76,18 @@ export default function Home() {
     try {
       const formData = new FormData()
       formData.append('resume', pdfFile)
-      formData.append('jobDescription', jobDesc)
+      if (jobDesc.trim()) {
+        formData.append('jobDescriptionText', jobDesc.trim())
+      }
+      if (jdFile) {
+        formData.append('jobDescriptionFile', jdFile)
+      }
 
       // Call analyze API - tokens will be deducted in backend after successful analysis
       const freshToken = await getToken()
 
       const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL ||'http://localhost:5000'}/api/analyze`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/analyze`,
         formData,
         {
           headers: {
@@ -68,12 +98,9 @@ export default function Home() {
       )
 
       if (res.status === 200 && res.data?.analysis) {
-        const { analysis, remainingTokens } = res.data
+        const { analysis, analysisId, remainingTokens } = res.data
 
         if (analysis.overall_score !== null && analysis.overall_score !== undefined) {
-          // Update UI with analysis results
-          setScoreData(analysis)
-          
           // Update tokens immediately with the value returned from backend
           if (remainingTokens !== undefined) {
             updateTokens(remainingTokens)
@@ -83,6 +110,7 @@ export default function Home() {
           }
 
           toast.success('Analysis completed successfully!')
+          navigate(analysisId ? `/dashboard/${analysisId}` : '/dashboard')
         } else {
           throw new Error("Invalid analysis result — no score found.")
         }
@@ -105,7 +133,7 @@ export default function Home() {
     <div className='bg-violet-50'>
       <Navbar />
 
-      <div className="w-full min-h-screen py-32 px-4 sm:px-8 flex justify-center pt-28 sm:pt-32">
+      <div className="w-full h-screen px-4 sm:px-8 pt-18 flex justify-center items-centernpm">
         <div className="max-w-4xl w-full flex flex-col lg:flex-row gap-12 items-center">
           
           {/* Left Section - Text */}
@@ -128,14 +156,14 @@ export default function Home() {
               <div className="flex flex-col mb-4">
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
                   <Upload size={18} className="text-indigo-600" />
-                  Upload your resume (PDF)
+                  Upload your resume (PDF or Word)
                 </label>
 
                 {/* Hidden native input */}
                 <input
                   id="resumeUpload"
                   type="file"
-                  accept=".pdf"
+                  accept=".pdf,.docx"
                   onChange={handleFileChange}
                   className="hidden"
                 />
@@ -145,18 +173,42 @@ export default function Home() {
                   htmlFor="resumeUpload"
                   className="cursor-pointer flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 hover:bg-gray-100 px-4 py-2 text-sm text-gray-700 shadow-sm transition-all duration-200"
                 >
-                  {pdfFile ? <p className="text-xs text-black-500 font-medium truncate"> {pdfFile.name} </p> : 'Choose File'}
+                  {pdfFile ? <p className="text-xs text-black-500 font-medium truncate"> {pdfFile.name} </p> : 'Choose Resume File'}
                 </label>
 
               </div>
-              <label className="text-sm font-medium mb-2 text-gray-700">Job Description (optional) </label>
-              <textarea
-                rows={4}
-                className="border border-gray-300 rounded-md px-4 py-2 mb-5 text-sm"
-                placeholder="Paste the job description here..."
-                value={jobDesc}
-                onChange={(e) => setJobDesc(e.target.value)}
-              />
+              <div className="flex flex-col gap-3 mb-5">
+                <label className="text-sm font-medium text-gray-700">Job Description (optional)</label>
+                <textarea
+                  rows={4}
+                  className="border border-gray-300 rounded-md px-4 py-2 text-sm"
+                  placeholder="Paste the job description here..."
+                  value={jobDesc}
+                  onChange={(e) => setJobDesc(e.target.value)}
+                />
+
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                    <Upload size={18} className="text-indigo-600" />
+                      Or upload JD (PDF or DOCX)
+                  </label>
+
+                  <input
+                    id="jdUpload"
+                    type="file"
+                      accept=".pdf,.docx"
+                    onChange={handleJdFileChange}
+                    className="hidden"
+                  />
+
+                  <label
+                    htmlFor="jdUpload"
+                    className="cursor-pointer flex items-center justify-center rounded-md border border-gray-300 bg-gray-50 hover:bg-gray-100 px-4 py-2 text-sm text-gray-700 shadow-sm transition-all duration-200"
+                  >
+                    {jdFile ? <p className="text-xs text-black-500 font-medium truncate"> {jdFile.name} </p> : 'Choose JD File'}
+                  </label>
+                </div>
+              </div>
 
               <button
                 onClick={handleSubmit}
@@ -167,13 +219,10 @@ export default function Home() {
               </button>
 
               <a href='/pricing' className='text-xs block text-center text-violet-500'>Need Tokens ?</a>
+              <p className="text-xs text-center text-slate-500">
+                Your saved analysis will open in the dashboard after processing.
+              </p>
             </div>
-
-            {/* Analysis Result section */}
-            <AnalysisResult
-              scoreData={scoreData}
-              onClose={() => setScoreData(null)}
-            />
           </div>
         </div>
       </div>

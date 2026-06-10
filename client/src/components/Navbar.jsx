@@ -13,7 +13,7 @@ export default function Navbar() {
   const location = useLocation()
   const { tokens, loading } = useAuthToken()
 
-  const showTokens = isSignedIn && (location.pathname === '/upload' || location.pathname === '/pricing')
+  const showTokens = isSignedIn && (location.pathname === '/upload' || location.pathname === '/pricing' || location.pathname.startsWith('/dashboard'))
 
   return (
     <div className="w-full">
@@ -38,6 +38,7 @@ export default function Navbar() {
             <a href="/" className="hover:text-indigo-600 font-semibold">Home</a>
             <a href="/#features" className="hover:text-indigo-600 font-semibold">Features</a>
             <a href="/pricing" className="hover:text-indigo-600 font-semibold">Pricing</a>
+            {isSignedIn && <a href="/dashboard" className="hover:text-indigo-600 font-semibold">Dashboard</a>}
             <a href="/#contact" className="hover:text-indigo-600 font-semibold">Contact Us</a>
 
             {showTokens && (
@@ -86,6 +87,7 @@ export default function Navbar() {
           <a href="/" onClick={() => setMenuOpen(false)}>Home</a>
           <a href="/#features" onClick={() => setMenuOpen(false)}>Features</a>
           <a href="/pricing" onClick={() => setMenuOpen(false)}>Pricing</a>
+          {isSignedIn && <a href="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</a>}
           <a href="/#contact" onClick={() => setMenuOpen(false)}>Contact Us</a>
         </nav>
       </div>

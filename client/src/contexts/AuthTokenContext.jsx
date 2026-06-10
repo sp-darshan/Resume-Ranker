@@ -14,7 +14,7 @@ export function AuthTokenProvider({ children }) {
   const isMountedRef = useRef(true)
   const retryAttemptRef = useRef(0)
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+  const backendUrl = import.meta.env.VITE_BACKEND_URL
 
   const clearRetryTimer = () => {
     if (retryTimerRef.current) {

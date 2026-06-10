@@ -2,24 +2,31 @@
 
 import { useState } from 'react'
 import axios from 'axios'
-import { useUser } from '@clerk/clerk-react'
+import { useAuth, useUser } from '@clerk/clerk-react'
 import { useAuthToken } from '../contexts/AuthTokenContext.jsx';
 import toast from 'react-hot-toast';
 
 export function usePayment() {
   const [loading, setLoading] = useState(false)
   const { user } = useUser()
+  const { getToken } = useAuth()
   const { refreshTokens } = useAuthToken()
 
   const handlePayment = async (amount, tokensToAdd) => {
     try {
       setLoading(true)
 
+      const token = await getToken()
+      if (!token) {
+        toast.error('Please sign in again')
+        return
+      }
+
       // Create order in backend
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/payments/create-order`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/payments/create-order`,
         { amount },
-        { headers: { 'Content-Type': 'application/json' } }
+        { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } }
       )
 
       const { order } = data
@@ -38,13 +45,12 @@ export function usePayment() {
           // Verify payment and credit tokens
           try {
             const verifyRes = await axios.post(
-              `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/payments/verify`,
+              `${import.meta.env.VITE_BACKEND_URL}/api/payments/verify`,
               {
                 ...response, // contains payment_id, order_id, signature
-                amount, // so backend knows how much was paid
-                userId: user?.primaryEmailAddress?.emailAddress,
                 tokensToAdd,
-              }
+              },
+              { headers: { Authorization: `Bearer ${token}` } }
             )
             console.log("Verification response:", verifyRes.data);
             // After successful verification, refresh token balance

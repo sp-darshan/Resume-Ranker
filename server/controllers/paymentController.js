@@ -26,7 +26,15 @@ export const createOrder = async (req, res) => {
 // Verify Payment and Update Tokens
 export const verifyPayment = async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId: email, tokensToAdd } = req.body;
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      tokensToAdd
+    } = req.body;
+    
+    const clerkId = req.user?.sub;
+
     console.log("Verification started");
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -55,16 +63,18 @@ export const verifyPayment = async (req, res) => {
     // Payment Verified - Now Update User Tokens
     console.log("Payment verified successfully");
 
-    if (!email || !tokensToAdd) {
+    const tokenAmount = parseInt(tokensToAdd, 10)
+
+    if (!clerkId || !Number.isFinite(tokenAmount) || tokenAmount <= 0) {
       return res
         .status(400)
         .json({ success: false, message: "Missing user or token info" });
     }
 
     const updatedUser = await User.findOneAndUpdate(
-      { email }, // match by Clerk ID (make sure it's stored in user model)
-      { $inc: { tokens: tokensToAdd } }, // increment existing tokens
-      { new: true } // return updated document
+      { uid: clerkId },
+      { $inc: { tokens: tokenAmount } },
+      { new: true }
     );
 
     if (!updatedUser) {
@@ -73,7 +83,7 @@ export const verifyPayment = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    console.log(`Added ${tokensToAdd} tokens to user ${email}`);
+    console.log(`Added ${tokenAmount} tokens to user ${clerkId}`);
     return res.json({
       success: true,
       message: "Payment verified & tokens added successfully",
