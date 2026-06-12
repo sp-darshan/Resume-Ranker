@@ -133,7 +133,7 @@ export default function Home() {
     <div className='bg-violet-50'>
       <Navbar />
 
-      <div className="w-full h-screen px-4 sm:px-8 pt-18 flex justify-center items-centernpm">
+      <div className="w-full min-h-screen px-4 sm:px-8 pt-18 flex justify-center items-centernpm">
         <div className="max-w-4xl w-full flex flex-col lg:flex-row gap-12 items-center">
           
           {/* Left Section - Text */}
@@ -151,7 +151,7 @@ export default function Home() {
           </div>
 
           {/* Right Section - Form */}
-          <div className="flex-1 bg-white rounded-2xl shadow-xl p-8 w-full max-w-md min-h-[400px]">
+          <div className="flex-1 bg-white rounded-2xl shadow-xl p-6 mb-5 sm:mb-0 sm:p-8 w-full max-w-md">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col mb-4">
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
